@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aventura Digital: Riesgos en Línea</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            gap: 20px;
+        }
+
+        .stat-box {
+            background: rgba(255,255,255,0.2);
+            padding: 15px 25px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .scenario {
+            margin-bottom: 30px;
+        }
+
+        .scenario-image {
+            font-size: 4em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .scenario-text {
+            font-size: 1.2em;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .choice-btn {
+            background: white;
+            border: 2px solid #667eea;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            color: #333;
+        }
+
+        .choice-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateX(10px);
+        }
+
+        .choice-btn.correct {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+
+        .choice-btn.incorrect {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            line-height: 1.6;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+            animation: slideIn 0.5s;
+        }
+
+        .feedback.correct {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            color: #065f46;
+        }
+
+        .feedback.incorrect {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            color: #991b1b;
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .next-btn.show {
+            display: inline-block;
+        }
+
+        .next-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .final-screen {
+            text-align: center;
+            display: none;
+        }
+
+        .final-screen.show {
+            display: block;
+        }
+
+        .final-emoji {
+            font-size: 5em;
+            margin: 20px 0;
+        }
+
+        .final-score {
+            font-size: 3em;
+            color: #667eea;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .final-message {
+            font-size: 1.3em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: white;
+            transition: width 0.5s;
+            border-radius: 10px;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🛡️ Aventura Digital</h1>
+            <p>Aprende a navegar seguro en internet</p>
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-label">Puntos</div>
+                    <div class="stat-value" id="score">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Nivel</div>
+                    <div class="stat-value" id="level">1</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Seguridad</div>
+                    <div class="stat-value" id="safety">100%</div>
+                </div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div id="game-area">
+                <div class="scenario">
+                    <div class="scenario-image" id="emoji">📱</div>
+                    <div class="scenario-text" id="scenario-text"></div>
+                    <div class="choices" id="choices"></div>
+                    <div class="feedback" id="feedback"></div>
+                    <button class="next-btn" id="next-btn">Siguiente Desafío →</button>
+                </div>
+            </div>
+
+            <div class="final-screen" id="final-screen">
+                <div class="final-emoji" id="final-emoji">🏆</div>
+                <h2>¡Juego Completado!</h2>
+                <div class="final-score" id="final-score"></div>
+                <div class="final-message" id="final-message"></div>
+                <button class="restart-btn" onclick="location.reload()">Jugar de Nuevo</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scenarios = [
+            {
+                emoji: "📱",
+                text: "Recibes un mensaje de texto de un número desconocido que dice: '¡FELICIDADES! Has ganado un iPhone 15. Haz clic en este enlace para reclamarlo: bit.ly/premio123'. ¿Qué haces?",
+                choices: [
+                    { text: "Hacer clic en el enlace inmediatamente porque suena emocionante", correct: false },
+                    { text: "Ignorar el mensaje y bloquearlo. Los premios reales no llegan así", correct: true },
+                    { text: "Compartir el enlace con amigos para que también ganen", correct: false },
+                    { text: "Responder preguntando más detalles del premio", correct: false }
+                ],
+                feedback: {
+                    correct: "¡Excelente! Este es un clásico intento de phishing. Los premios legítimos nunca se anuncian por mensajes de números desconocidos con enlaces sospechosos. Siempre desconfía de ofertas que parecen demasiado buenas para ser verdad.",
+                    incorrect: "Cuidado, este es un intento de phishing. Los estafadores usan la emoción de 'ganar algo' para que hagas clic en enlaces maliciosos que pueden robar tu información o infectar tu dispositivo. Nunca hagas clic en enlaces de mensajes no solicitados."
+                },
+                points: 100
+            },
+            {
+                emoji: "🔒",
+                text: "Estás creando una cuenta en una nueva red social que te encanta. Te pide crear una contraseña. ¿Cuál eliges?",
+                choices: [
+                    { text: "Tu fecha de nacimiento: '15082010'", correct: false },
+                    { text: "Tu nombre y apellido: 'JuanPerez'", correct: false },
+                    { text: "La misma contraseña que usas en todas partes: 'password123'", correct: false },
+                    { text: "Una combinación única: 'M!P3rr0#2024$RsD'", correct: true }
+                ],
+                feedback: {
+                    correct: "¡Perfecto! Has elegido una contraseña fuerte: mezcla mayúsculas, minúsculas, números y símbolos. Además, es única para esta cuenta. Usa contraseñas diferentes para cada sitio y considera un gestor de contraseñas para recordarlas.",
+                    incorrect: "Esa contraseña es débil y peligrosa. Las contraseñas deben tener al menos 12 caracteres, mezclar mayúsculas, minúsculas, números y símbolos especiales. Nunca uses información personal obvia ni la misma contraseña en varios sitios."
+                },
+                points: 150
+            },
+            {
+                emoji: "👥",
+                text: "En Instagram, alguien con foto de perfil atractiva te envía una solicitud de amistad. El perfil tiene 3 fotos, 50 seguidores y fue creado hace 2 semanas. Te escribe: 'Hola, me gustó tu perfil ¿podemos chatear?'. ¿Qué haces?",
+                choices: [
+                    { text: "Aceptar y empezar a chatear. Se ve interesante", correct: false },
+                    { text: "Ignorar o rechazar la solicitud. Es sospechoso", correct: true },
+                    { text: "Aceptar pero compartir solo información personal básica", correct: false },
+                    { text: "Preguntarle de dónde te conoce antes de aceptar", correct: false }
+                ],
+                feedback: {
+                    correct: "¡Bien pensado! Este perfil tiene todas las señales de ser falso: pocas fotos, pocos seguidores, cuenta nueva, contacto no solicitado. Los estafadores crean perfiles falsos para ganarse tu confianza y luego pedirte dinero o información personal.",
+                    incorrect: "Ten cuidado. Este perfil muestra señales clásicas de ser falso: cuenta reciente, pocos seguidores, contacto inesperado. Los ciberdelincuentes usan perfiles falsos para establecer relaciones, luego piden dinero, fotos comprometedoras o información personal. Nunca aceptes solicitudes de desconocidos."
+                },
+                points: 150
+            },
+            {
+                emoji: "📧",
+                text: "Recibes un email que parece ser de tu banco: 'Actividad sospechosa detectada. Haz clic aquí para verificar tu cuenta o será bloqueada en 24 horas'. El email tiene el logo del banco pero la dirección es: soporte-banco@gmail.com. ¿Qué haces?",
+                choices: [
+                    { text: "Hacer clic en el enlace para verificar mi cuenta rápidamente", correct: false },
+                    { text: "Llamar directamente a mi banco usando el número oficial de su sitio web", correct: true },
+                    { text: "Responder el email con mis datos para verificar mi identidad", correct: false },
+                    { text: "Reenviar el email a amigos para advertirles", correct: false }
+                ],
+                feedback: {
+                    correct: "¡Excelente decisión! Nunca confíes en emails urgentes sobre tu cuenta bancaria. Los bancos reales nunca piden verificar cuentas por email o amenzan con bloqueos inmediatos. Siempre contacta a tu banco directamente usando sus canales oficiales.",
+                    incorrect: "¡Peligro! Este es un email de phishing clásico. Pistas: urgencia artificial ('24 horas'), dirección de email sospechosa (@gmail.com en lugar del dominio del banco), y solicitud de acción inmediata. Los bancos nunca operan así. Siempre verifica contactando directamente al banco."
+                },
+                points: 200
+            },
+            {
+                emoji: "📸",
+                text: "Tu mejor amigo te pide tu contraseña de Netflix para ver una serie. Es tu amigo de confianza. ¿Qué haces?",
+                choices: [
+                    { text: "Darle la contraseña, es mi amigo y confío en él", correct: false },
+                    { text: "No compartir contraseñas nunca, ofrecerle crear un perfil en mi cuenta", correct: true },
+                    { text: "Darle la contraseña pero pedirle que la cambie después", correct: false },
+                    { text: "Compartir mi cuenta con usuario y contraseña por mensaje", correct: false }
+                ],
+                feedback: {
+                    correct: "¡Correcto! Incluso con personas de confianza, nunca compartas contraseñas. Es una buena práctica de seguridad. Además, servicios como Netflix permiten múltiples perfiles sin comprometer tu seguridad. Las contraseñas son personales e intransferibles.",
+                    incorrect: "Aunque sea un amigo de confianza, compartir contraseñas es siempre riesgoso. Si tu amigo usa el mismo email/contraseña en otro sitio que es hackeado, tu cuenta también está en riesgo. Las contraseñas son personales. Netflix y otros servicios permiten crear perfiles sin compartir contraseñas."
+                },
+                points: 150
+            },
+            {
+                emoji: "🌐",
+                text: "Estás en un café usando el WiFi público gratis llamado 'WiFi_Gratis_Cafe'. Necesitas revisar tu cuenta bancaria en línea. ¿Qué haces?",
+                choices: [
+                    { text: "Conectarme y revisar mi banco, el WiFi es del café", correct: false },
+                    { text: "Esperar a llegar a casa o usar mis datos móviles para el banco", correct: true },
+                    { text: "Usar el WiFi pero asegurarme que la página sea 'https'", correct: false },
+                    { text: "Preguntarle al mesero la contraseña del WiFi 'seguro'", correct: false }
+                ],
+                feedback: {
+                    correct: "¡Perfecto! El WiFi público nunca es seguro para transacciones bancarias. Los hackers pueden interceptar tu información fácilmente en redes públicas. Para asuntos sensibles (bancos, compras, contraseñas), usa siempre tu red móvil o una red privada de confianza.",
+                    incorrect: "¡Alto ahí! El WiFi público es peligroso para información sensible. Los hackers pueden crear redes falsas o interceptar datos en redes públicas legítimas. Incluso con 'https', hay riesgos. Para banca en línea, usa solo tu red privada o datos móviles."
+                },
+                points: 200
+            },
+            {
+                emoji: "🎮",
+                text: "En un juego online, alguien te ofrece 'trucos gratis' y te pide instalar un programa desde un enlace. Promete darte monedas ilimitadas. ¿Qué haces?",
+                choices: [
+                    { text: "Instalar el programa, suena genial tener monedas gratis", correct: false },
+                    { text: "Rechazar la oferta. Los 'trucos gratis' suelen ser malware", correct: true },
+                    { text: "Compartir el enlace con amigos primero para ver si funciona", correct: false },
+                    { text: "Instalar pero en modo incógnito para estar seguro", correct: false }
+                ],
+                feedback: {
+                    correct: "¡Excelente instinto! Los 'trucos' o 'hacks' gratuitos para juegos casi siempre son malware disfrazado. Pueden robar tus cuentas, infectar tu dispositivo o usar tu computadora para actividades ilegales. Juega limpio y reporta a quien ofrezca estos 'trucos'.",
+                    incorrect: "¡Peligro! Los programas que prometen 'trucos gratis', 'hacks' o 'monedas ilimitadas' son casi siempre virus, troyanos o malware. Pueden robar tus contraseñas, datos bancarios o tomar control de tu dispositivo. Nunca instales software de fuentes no oficiales."
+                },
+                points: 150
+            },
+            {
+                emoji: "📱",
+                text: "Una aplicación popular te pide acceso a: tu cámara, micrófono, contactos, ubicación y archivos. Es una app de linterna. ¿Qué haces?",
+                choices: [
+                    { text: "Aceptar todos los permisos para que funcione bien", correct: false },
+                    { text: "Denegar y buscar otra app. Una linterna no necesita todo eso", correct: true },
+                    { text: "Aceptar solo cámara y ubicación", correct: false },
+                    { text: "Instalar pero desactivar permisos después", correct: false }
+                ],
+                feedback: {
+                    correct: "¡Muy inteligente! Una app de linterna solo necesita acceso a la cámara/flash. Si pide contactos, micrófono, ubicación y archivos, está recopilando datos innecesarios. Siempre pregúntate: ¿esta app realmente necesita este permiso? Si no, niégalo o busca alternativas.",
+                    incorrect: "¡Alerta roja! Una linterna solo necesita la cámara/flash. Si pide acceso excesivo a contactos, micrófono, ubicación, etc., probablemente está recopilando y vendiendo tus datos. Siempre revisa qué permisos pide una app y pregúntate si son razonables para su función."
+                },
+                points: 200
+            }
+        ];
+
+        let currentScenario = 0;
+        let score = 0;
+        let safetyLevel = 100;
+        let answered = false;
+
+        function loadScenario() {
+            const scenario = scenarios[currentScenario];
+            answered = false;
+            
+            document.getElementById('emoji').textContent = scenario.emoji;
+            document.getElementById('scenario-text').textContent = scenario.text;
+            document.getElementById('level').textContent = currentScenario + 1;
+            
+            const choicesContainer = document.getElementById('choices');
+            choicesContainer.innerHTML = '';
+            
+            scenario.choices.forEach((choice, index) => {
+                const button = document.createElement('button');
+                button.className = 'choice-btn';
+                button.textContent = choice.text;
+                button.onclick = () => selectChoice(index);
+                choicesContainer.appendChild(button);
+            });
+            
+            document.getElementById('feedback').classList.remove('show');
+            document.getElementById('next-btn').classList.remove('show');
+            
+            updateProgress();
+        }
+
+        function selectChoice(choiceIndex) {
+            if (answered) return;
+            answered = true;
+            
+            const scenario = scenarios[currentScenario];
+            const choice = scenario.choices[choiceIndex];
+            const buttons = document.querySelectorAll('.choice-btn');
+            const feedbackDiv = document.getElementById('feedback');
+            
+            buttons.forEach((btn, idx) => {
+                btn.style.pointerEvents = 'none';
+                if (idx === choiceIndex) {
+                    btn.classList.add(choice.correct ? 'correct' : 'incorrect');
+                }
+                if (scenario.choices[idx].correct) {
+                    btn.classList.add('correct');
+                }
+            });
+            
+            if (choice.correct) {
+                score += scenario.points;
+                feedbackDiv.className = 'feedback correct show';
+                feedbackDiv.textContent = '✅ ' + scenario.feedback.correct;
+            } else {
+                safetyLevel = Math.max(0, safetyLevel - 15);
+                feedbackDiv.className = 'feedback incorrect show';
+                feedbackDiv.textContent = '⚠️ ' + scenario.feedback.incorrect;
+            }
+            
+            document.getElementById('score').textContent = score;
+            document.getElementById('safety').textContent = safetyLevel + '%';
+            document.getElementById('next-btn').classList.add('show');
+        }
+
+        function nextScenario() {
+            currentScenario++;
+            
+            if (currentScenario >= scenarios.length) {
+                showFinalScreen();
+            } else {
+                loadScenario();
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentScenario + 1) / scenarios.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+        }
+
+        function showFinalScreen() {
+            document.getElementById('game-area').style.display = 'none';
+            const finalScreen = document.getElementById('final-screen');
+            finalScreen.classList.add('show');
+            
+            const maxScore = scenarios.reduce((sum, s) => sum + s.points, 0);
+            const percentage = (score / maxScore) * 100;
+            
+            let emoji, message;
+            if (percentage >= 90) {
+                emoji = '🏆';
+                message = '¡Eres un experto en seguridad digital! Tu conocimiento te mantendrá seguro en línea.';
+            } else if (percentage >= 70) {
+                emoji = '🌟';
+                message = '¡Muy bien! Tienes buen conocimiento sobre riesgos en línea. Sigue aprendiendo.';
+            } else if (percentage >= 50) {
+                emoji = '📚';
+                message = 'Buen intento. Hay áreas importantes que mejorar para estar más seguro en internet.';
+            } else {
+                emoji = '⚠️';
+                message = 'Es importante que aprendas más sobre seguridad digital. ¡La práctica hace al maestro!';
+            }
+            
+            document.getElementById('final-emoji').textContent = emoji;
+            document.getElementById('final-score').textContent = score + ' / ' + maxScore + ' puntos';
+            document.getElementById('final-message').textContent = message;
+        }
+
+        document.getElementById('next-btn').onclick = nextScenario;
+
+        // Iniciar el juego
+        loadScenario();
+    </script>
+</body>
+</html>
